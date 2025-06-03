@@ -1,0 +1,5 @@
+const alertHash = sha256(JSON.stringify(d));
+const dup = await Alert.findOne({ property: prop._id, type, 'diffHash': alertHash });
+if (dup) continue;
+
+await Alert.create({ ... , diffHash: alertHash });

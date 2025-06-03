@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    td, th { border: 1px solid #000; padding: 4px; }
+    h1 { text-align: center; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>주택 임대차 계약서</h1>
+
+  <h3>① 부동산의 표시</h3>
+  <table>
+    <tr><th>주소</th><td>{{estate.address}}</td></tr>
+    <tr><th>건물명</th><td>{{estate.buildingName}}</td></tr>
+    <tr><th>전용면적</th><td>{{estate.exclusiveArea}} ㎡</td></tr>
+  </table>
+
+  <h3>② 당사자</h3>
+  <table>
+    <tr><th>임대인</th><td>{{lessor.name}}</td></tr>
+    <tr><th>임차인</th><td>{{lessee.name}}</td></tr>
+    <tr><th>공인중개사</th><td>{{agentEmail}}</td></tr>
+  </table>
+
+  <h3>③ 계약 내용</h3>
+  <table>
+    <tr><th>보증금</th><td>{{finance.deposit}} 원</td></tr>
+    <tr><th>월세</th><td>{{finance.monthly}} 원</td></tr>
+    <tr><th>잔금 지급일</th><td>{{finance.balancePaidAt}}</td></tr>
+  </table>
+
+  <h3>④ 임대기간</h3>
+  <table>
+    <tr><th>시작</th><td>{{period.start}}</td></tr>
+    <tr><th>종료</th><td>{{period.end}}</td></tr>
+  </table>
+
+  <h3>⑤ 특약사항</h3>
+  <p>{{specialTerms}}</p>
+
+  <h3>⑥ 서명</h3>
+  <p>임대인ㆍ임차인이 전자서명으로 갈음함.</p>
+</body>
+</html>

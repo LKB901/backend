@@ -1,0 +1,283 @@
+openapi: 3.0.3
+info:
+  title: Lease-Contract Kiosk API
+  version: 0.2.0
+  description: |
+    - 부동산 등기변동 모니터링 · 전자계약 백엔드  
+    - **stub 모드** ➀ 등기부 API, ➁ 메일, ➂ S3 를 모두 오프라인으로 대체  
+    - `Authorization: Bearer <JWT>` 헤더 필요 (로그인 제외)
+
+servers:
+  - url: http://localhost:3000
+
+security:
+  - bearerAuth: []          # 모든 경로 기본적용
+
+tags:
+  - name: Agents
+  - name: Contracts
+  - name: Properties
+  - name: Registry
+  - name: Alerts
+
+# ─────────────────────────── paths ────────────────────────────
+paths:
+  /agents/register:
+    post:
+      tags: [Agents]
+      summary: 공인중개사 회원가입
+      operationId: registerAgent
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [email, password, idImage]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string, format: password }
+                idImage:  { type: string, format: binary }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Agent' } } } }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /agents/login:
+    post:
+      tags: [Agents]
+      summary: 로그인
+      operationId: loginAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credential' }
+      responses:
+        '200':
+          description: JWT 반환
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+
+  /contracts:
+    post:
+      tags: [Contracts]
+      summary: 계약 초안(DRAFT) 생성
+      operationId: createContract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContractDraft' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
+
+  /contracts/{id}/pdf:
+    post:
+      tags: [Contracts]
+      summary: 계약서 PDF 생성 + (로컬/S3) 업로드
+      operationId: generateContractPdf
+      parameters:
+        - $ref: '#/components/parameters/ContractId'
+      responses:
+        '200':
+          description: PDF 업로드 결과
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key: { type: string, description: S3 (or local) 키 }
+
+  /properties:
+    get:
+      tags: [Properties]
+      summary: 매물 목록
+      operationId: listProperties
+      responses:
+        '200':
+          description: 배열 반환
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Property' }
+
+    post:
+      tags: [Properties]
+      summary: 매물 구독 (등기 모니터링 시작)
+      operationId: subscribeProperty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PropertySubscribe' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Property' } } } }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /registry/{propId}/snapshots:
+    get:
+      tags: [Registry]
+      summary: 매물 스냅샷 히스토리
+      operationId: listSnapshots
+      parameters:
+        - $ref: '#/components/parameters/PropertyId'
+      responses:
+        '200':
+          description: 모든 스냅샷
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Snapshot' }
+
+  /registry/{propId}/refresh:
+    post:
+      tags: [Registry]
+      summary: 스냅샷 강제 갱신(등기부 API 호출)  — 관리자용
+      operationId: refreshRegistry
+      parameters:
+        - $ref: '#/components/parameters/PropertyId'
+      responses:
+        '202': { description: Enqueued }
+
+  /alerts:
+    get:
+      tags: [Alerts]
+      summary: 미발송 Alert 목록
+      operationId: listAlerts
+      parameters:
+        - in: query
+          name: sent
+          schema: { type: boolean }
+          description: true → 발송 완료만 / false → 미발송만 / 생략 → 전체
+      responses:
+        '200':
+          description: Alert 배열
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Alert' }
+
+# ─────────────────────── components ───────────────────────────
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PropertyId:
+      in: path
+      name: propId
+      required: true
+      schema: { type: string }
+    ContractId:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+
+  responses:
+    Conflict:
+      description: 리소스 중복
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    # ── Auth ────────────────────────────────
+    Credential:
+      type: object
+      required: [email, password]
+      properties:
+        email:    { type: string, format: email }
+        password: { type: string, format: password }
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+
+    # ── Property & Registry ─────────────────
+    PropertySubscribe:
+      type: object
+      required: [addressBasic, uniqueNo, subsEmail]
+      properties:
+        addressBasic:  { type: string }
+        addressDetail: { type: string }
+        uniqueNo:      { type: string, example: '101234567890' }
+        subsEmail:     { type: array, items: { type: string, format: email } }
+
+    Property:
+      allOf:
+        - $ref: '#/components/schemas/PropertySubscribe'
+        - type: object
+          required: [_id, snapshots]
+          properties:
+            _id: { type: string }
+            snapshots:
+              type: array
+              items: { $ref: '#/components/schemas/Snapshot' }
+
+    Snapshot:
+      type: object
+      required: [fetchedAt, hash, parsed]
+      properties:
+        fetchedAt: { type: string, format: date-time }
+        hash:      { type: string }
+        parsed:    { type: object }
+
+    # ── Alert ───────────────────────────────
+    Alert:
+      type: object
+      required: [_id, type, message, createdAt, sent]
+      properties:
+        _id:       { type: string }
+        property:  { $ref: '#/components/schemas/Property' }
+        type:
+          type: string
+          enum: [OWNER_CHANGE, LIEN_ADDED, LIEN_REMOVED, LIEN_AMOUNT_CHANGE, AUCTION_REGISTERED, UNKNOWN]
+        message:   { type: string }
+        diff:      { type: object }
+        sent:      { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    # ── Agent ───────────────────────────────
+    Agent:
+      type: object
+      required: [_id, email, status]
+      properties:
+        _id:    { type: string }
+        email:  { type: string, format: email }
+        status:
+          type: string
+          enum: [PENDING, APPROVED]
+
+    # ── Contract ────────────────────────────
+    ContractDraft:
+      type: object
+      required: [tenantName, landlordName, monthlyRent]
+      properties:
+        tenantName:   { type: string }
+        landlordName: { type: string }
+        monthlyRent:  { type: integer, format: int32 }
+
+    Contract:
+      allOf:
+        - $ref: '#/components/schemas/ContractDraft'
+        - type: object
+          required: [_id, status]
+          properties:
+            _id:    { type: string }
+            status:
+              type: string
+              enum: [DRAFT, SIGNING, COMPLETE]

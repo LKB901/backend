@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    /* ---------- 기본 컴파일 옵션 ---------- */
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    /* ---------- 디렉터리 ---------- */
+    "rootDir": "src",                 // src·api 모두 포함
+    "outDir": "dist",
+
+    /* ---------- 편의 옵션 ---------- */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+
+    /* ---------- 타입 루트 ---------- */
+    "typeRoots": [
+      "./src/@types",
+      "./node_modules/@types"
+    ]
+  },
+
+  /* ---------- 컴파일 대상 ---------- */
+  "include": [
+    "src/**/*"
+  ],
+
+  /* ---------- 제외 ---------- */
+  "exclude": [
+    "node_modules",
+    ".vercel",
+    "api/**/*"
+  ]
+}
