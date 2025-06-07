@@ -7,7 +7,7 @@ exports.fetchRegistry = fetchRegistry;
 // 실 API ↔ 스텁 전환 + XML→JSON 파싱
 const axios_1 = __importDefault(require("axios"));
 const xml2js_1 = require("xml2js");
-const crypto_1 = __importDefault(require("crypto"));
+const crypt_1 = require("./crypt");
 const registryNormalize_1 = require("./registryNormalize");
 const registryStub_1 = require("./registryStub");
 const { USE_STUB_REGISTRY, REGISTRY_API_BASE, REGISTRY_API_KEY, REGISTRY_TIMEOUT_MS = '10000', } = process.env;
@@ -26,9 +26,6 @@ async function fetchRegistry(uniqueNo) {
     });
     const json = await (0, xml2js_1.parseStringPromise)(data, { explicitArray: false });
     const parsed = (0, registryNormalize_1.normalize)(json);
-    const hash = sha256(data);
+    const hash = (0, crypt_1.sha256)(data);
     return { rawXml: data, parsed, hash };
-}
-function sha256(txt) {
-    return crypto_1.default.createHash('sha256').update(txt).digest('hex');
 }

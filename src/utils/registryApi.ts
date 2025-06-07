@@ -1,7 +1,7 @@
 // 실 API ↔ 스텁 전환 + XML→JSON 파싱
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
-import crypto from 'crypto';
+import {sha256} from "./crypt";
 import { normalize } from './registryNormalize';
 import { fetchRegistryStub } from './registryStub';
 
@@ -43,6 +43,4 @@ export async function fetchRegistry(uniqueNo: string): Promise<RegistryResult> {
   return { rawXml: data, parsed, hash };
 }
 
-function sha256(txt: string) {
-  return crypto.createHash('sha256').update(txt).digest('hex');
-}
+

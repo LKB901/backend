@@ -4,9 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startRegistryCron = startRegistryCron;
-exports.sha256 = sha256;
 const node_cron_1 = __importDefault(require("node-cron"));
-const crypto_1 = __importDefault(require("crypto"));
+const crypt_1 = require("../utils/crypt");
 const deep_diff_1 = __importDefault(require("deep-diff"));
 const property_model_1 = require("../models/property.model");
 const alert_model_1 = require("../models/alert.model");
@@ -88,7 +87,7 @@ async function processProperty(prop) {
         // deep-diff의 union 타입 안전 처리
         const lhs = 'lhs' in d ? d.lhs : undefined;
         const rhs = 'rhs' in d ? d.rhs : undefined;
-        const diffHash = sha256(`${prop.uniqueNo}|${type}|${pathStr}|${JSON.stringify(lhs)}|${JSON.stringify(rhs)}`);
+        const diffHash = (0, crypt_1.sha256)(`${prop.uniqueNo}|${type}|${pathStr}|${JSON.stringify(lhs)}|${JSON.stringify(rhs)}`);
         if (await alert_model_1.Alert.exists({ diffHash }))
             continue;
         /* 📄 PDF 자동 생성 */
@@ -111,10 +110,4 @@ async function processProperty(prop) {
         created++;
     }
     console.log('[REGISTRY] diff detected for', prop.uniqueNo, `(new=${created})`);
-}
-/* ─────────────────────────────────────────────
-   4. 유틸: SHA-256
-   ─────────────────────────────────────────── */
-function sha256(text) {
-    return crypto_1.default.createHash('sha256').update(text).digest('hex');
 }

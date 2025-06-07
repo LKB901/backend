@@ -9,7 +9,7 @@ const participantSchema = new mongoose_1.Schema({
     phoneNum: { type: String, default: '' },
     role: { type: String, enum: ['tenant', 'landlord'], required: true },
     verified: { type: Boolean, default: false },
-    ci: { type: String },
+    ciHash: { type: String },
     signedAt: { type: Date, default: null },
     tokenUsed: { type: Boolean, default: false },
 }, { _id: true });

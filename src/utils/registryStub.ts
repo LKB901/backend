@@ -2,7 +2,7 @@
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import crypto from 'crypto';
+import {sha256} from './crypt';
 
 import { normalize } from './registryNormalize';
 import { RegistryResult } from './registryApi';
@@ -33,8 +33,4 @@ export async function fetchRegistryStub(uniqueNo: string): Promise<RegistryResul
 
   console.log('[STUB] return', { uniqueNo, jsonPath });
   return { rawXml: `<xml>${data}</xml>`, parsed, hash };
-}
-
-function sha256(t: string) {
-  return crypto.createHash('sha256').update(t).digest('hex');
 }

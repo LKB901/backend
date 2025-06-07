@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import crypto from 'crypto';
+import {sha256} from '../utils/crypt';
 import deepDiff, { Diff } from 'deep-diff';
 
 import { Property, PropertyDoc } from '../models/property.model';
@@ -120,11 +120,4 @@ async function processProperty(prop: PropertyDoc): Promise<void> {
   }
 
   console.log('[REGISTRY] diff detected for', prop.uniqueNo, `(new=${created})`);
-}
-
-/* ─────────────────────────────────────────────
-   4. 유틸: SHA-256
-   ─────────────────────────────────────────── */
-export function sha256(text: string): string {
-  return crypto.createHash('sha256').update(text).digest('hex');
 }
