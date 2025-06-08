@@ -15,8 +15,10 @@ export async function addHashesAtchain(hashes: string[]): Promise<string[]> {
     const existResult: boolean[] = await contract.methods.getHashExist(hashes).call();
 
     let filtered= hashes.filter((_, index) => !existResult[index]);
-
     let notInclude= hashes.filter((_, index) => existResult[index]);
+    if(filtered.length==0){
+        return notInclude;
+    }
     const tx = {
         to: process.env.CONTRACT_ADDR,
         data: contract.methods.addHashes(filtered).encodeABI(),
