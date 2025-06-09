@@ -413,7 +413,8 @@ components:
         subsEmail:    { type: array, items: { type: string, format: email } }
         subsPhone:    { type: array, items: { type: string } }
     Property:
-      allOf:
+    type: object
+    allOf:
         - $ref: '#/components/schemas/PropertySubscribe'
         - type: object
           required: [_id, snapshots]
