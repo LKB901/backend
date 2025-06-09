@@ -1,13 +1,14 @@
+
 openapi: 3.0.3
 info:
   title: Lease‑Contract Kiosk API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     - 부동산 등기변동 모니터링 · 전자계약 백엔드
-    - **stub 모드** ➀ 등기부 API, ➁ 메일, ➂ S3 를 모두 오프라인으로 대체
     - `Authorization: Bearer <JWT>` 헤더 필요 (로그인 제외)
 servers:
   - url: https://api.leasecontract.kr/api/index/
+  - url: http://localhost:3000/api/index/
 security:
   - bearerAuth: []
 tags:
@@ -15,12 +16,8 @@ tags:
   - name: Contracts
   - name: Properties
   - name: Registry
-  - name: Alerts
   - name: PASS
 paths:
-  ##############################
-  #  Agents
-  ##############################
   /agents:
     post:
       tags: [Agents]
@@ -73,9 +70,6 @@ paths:
         '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/Agent' } } } }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  ##############################
-  #  Contracts
-  ##############################
   /contracts:
     post:
       tags: [Contracts]
@@ -165,9 +159,6 @@ paths:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  ##############################
-  #  Properties & Registry
-  ##############################
   /properties:
     get:
       tags: [Properties]
@@ -193,6 +184,7 @@ paths:
       responses:
         '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Property' } } } }
         '409': { $ref: '#/components/responses/Conflict' }
+
   /registry/{propId}:
     get:
       tags: [Registry]
@@ -228,9 +220,6 @@ paths:
       responses:
         '202': { description: accepted }
 
-  ##############################
-  #  PASS (본인확인 Stub)
-  ##############################
   /pass/mock-verify:
     post:
       tags: [PASS]
@@ -252,39 +241,13 @@ paths:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
 
-  ##############################
-  #  Alerts
-  ##############################
-  /alerts:
-    get:
-      tags: [Alerts]
-      summary: Alert 목록(필터 optional)
-      operationId: listAlerts
-      parameters:
-        - in: query
-          name: sent
-          schema: { type: boolean }
-      responses:
-        '200':
-          description: Alert 배열
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Alert' }
-
 components:
-  ##############################
-  # Security Schemes
-  ##############################
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  ##############################
-  # Common Parameters
-  ##############################
+
   parameters:
     AgentId:
       in: path
@@ -301,9 +264,7 @@ components:
       name: id
       required: true
       schema: { type: string }
-  ##############################
-  # Common Responses
-  ##############################
+
   responses:
     Conflict:
       description: 리소스 중복
@@ -320,23 +281,21 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-  ##############################
-  # Schemas
-  ##############################
+
   schemas:
-    # Auth
     Credential:
       type: object
       required: [email, password]
       properties:
         email:    { type: string, format: email }
         password: { type: string, format: password }
+
     Error:
       type: object
       required: [message]
       properties:
         message: { type: string }
-    # Agent
+
     Agent:
       type: object
       required: [_id, email, brokerNo, approved]
@@ -350,7 +309,7 @@ components:
         approved: { type: boolean }
         createdAt:{ type: string, format: date-time }
         updatedAt:{ type: string, format: date-time }
-    # Participant
+
     Participant:
       type: object
       required: [_id, email, role]
@@ -364,7 +323,7 @@ components:
         ci:        { type: string }
         signedAt:  { type: string, format: date-time, nullable: true }
         tokenUsed: { type: boolean }
-    # Contract
+
     ContractDraft:
       type: object
       required: [property, finance, period, participants]
@@ -386,7 +345,9 @@ components:
         participants:
           type: array
           items: { $ref: '#/components/schemas/Participant' }
+
     Contract:
+      type: object                     # <= FIXED
       allOf:
         - $ref: '#/components/schemas/ContractDraft'
         - type: object
@@ -398,7 +359,7 @@ components:
             pdfPath:  { type: string, nullable: true }
             createdAt:{ type: string, format: date-time }
             updatedAt:{ type: string, format: date-time }
-    # Property
+
     PropertySubscribe:
       type: object
       required: [buildingName, addressBasic, uniqueNo, space, landlord, subsEmail]
@@ -412,9 +373,10 @@ components:
         landlordName: { type: string }
         subsEmail:    { type: array, items: { type: string, format: email } }
         subsPhone:    { type: array, items: { type: string } }
+
     Property:
-    type: object
-    allOf:
+      type: object                     # <= FIXED
+      allOf:
         - $ref: '#/components/schemas/PropertySubscribe'
         - type: object
           required: [_id, snapshots]
@@ -425,6 +387,7 @@ components:
               items: { $ref: '#/components/schemas/Snapshot' }
             createdAt:{ type: string, format: date-time }
             updatedAt:{ type: string, format: date-time }
+
     Snapshot:
       type: object
       required: [fetchedAt, hash, parsed]
@@ -433,7 +396,7 @@ components:
         hash:      { type: string }
         parsed:    { type: object }
         rawXml:    { type: string }
-    # RegistryEvent
+
     RegistryEvent:
       type: object
       required: [_id, type, detectedAt]
@@ -443,15 +406,3 @@ components:
         type:      { type: string }
         diff:      { type: object }
         detectedAt:{ type: string, format: date-time }
-    # Alert
-    Alert:
-      type: object
-      required: [_id, type, createdAt, sent]
-      properties:
-        _id:       { type: string }
-        property:  { type: string }
-        type:      { type: string }
-        message:   { type: string }
-        diff:      { type: object }
-        sent:      { type: boolean }
-        createdAt: { type: string, format: date-time }
