@@ -307,8 +307,8 @@ components:
         brokerNo: { type: string }
         idImage:  { type: string }
         approved: { type: boolean }
-        createdAt:{ type: string, format: date-time }
-        updatedAt:{ type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
 
     Participant:
       type: object
@@ -357,8 +357,8 @@ components:
             agent:    { type: string }
             state:    { type: string, enum: [draft, pending, signed, cancelled] }
             pdfPath:  { type: string, nullable: true }
-            createdAt:{ type: string, format: date-time }
-            updatedAt:{ type: string, format: date-time }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
 
     PropertySubscribe:
       type: object
@@ -366,7 +366,7 @@ components:
       properties:
         buildingName: { type: string }
         addressBasic: { type: string }
-        addressDetail:{ type: string }
+        addressDetail: { type: string }
         space:        { type: integer }
         uniqueNo:     { type: string }
         landlord:     { type: string }
@@ -385,8 +385,8 @@ components:
             snapshots:
               type: array
               items: { $ref: '#/components/schemas/Snapshot' }
-            createdAt:{ type: string, format: date-time }
-            updatedAt:{ type: string, format: date-time }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
 
     Snapshot:
       type: object
@@ -405,4 +405,4 @@ components:
         property:  { type: string }
         type:      { type: string }
         diff:      { type: object }
-        detectedAt:{ type: string, format: date-time }
+        detectedAt: { type: string, format: date-time }
