@@ -12,7 +12,7 @@ import contractRouter from './routes/contract.routes';
 import propertyRouter from './routes/property.routes';
 import registryRouter from './routes/registry.routes';
 import passRouter     from './routes/pass.routes';
-
+import authCenterRouter from  './routes/authCenter'
 export const app = express();
 
 /* ── 공통 미들웨어 ── */
@@ -29,6 +29,7 @@ router.use('/contracts',  contractRouter);
 router.use('/properties', propertyRouter);
 router.use('/registry',   registryRouter);
 router.use('/pass',       passRouter);
+router.use('/authCenter', authCenterRouter);
 
 // 헬스 체크
 router.get('/health', (_req, res) => res.send('OK'));

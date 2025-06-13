@@ -5,7 +5,7 @@ export interface LandlordDoc extends Document {
   name   : string;
   phone ?: string;
   email ?: string;
-  ci    ?: string;   // PASS mock-up CI 값
+  ciHash?: string;   // PASS mock-up CI 값
 }
 
 const landlordSchema = new Schema<LandlordDoc>(
@@ -13,7 +13,7 @@ const landlordSchema = new Schema<LandlordDoc>(
     name : { type: String, required: true },
     phone: String,
     email: String,
-    ci   : String,
+    ciHash: String,
   },
   { timestamps: true }
 );
