@@ -1,28 +1,24 @@
+
 openapi: 3.0.3
 info:
-  title: Lease-Contract Kiosk API
-  version: 0.2.0
+  title: Lease‑Contract Kiosk API
+  version: 0.4.0
   description: |
-    - 부동산 등기변동 모니터링 · 전자계약 백엔드  
-    - **stub 모드** ➀ 등기부 API, ➁ 메일, ➂ S3 를 모두 오프라인으로 대체  
+    - 부동산 등기변동 모니터링 · 전자계약 백엔드
     - `Authorization: Bearer <JWT>` 헤더 필요 (로그인 제외)
-
 servers:
-  - url: http://localhost:3000
-
+  - url: https://api.leasecontract.kr/api/index/
+  - url: http://localhost:3000/api/index/
 security:
-  - bearerAuth: []          # 모든 경로 기본적용
-
+  - bearerAuth: []
 tags:
   - name: Agents
   - name: Contracts
   - name: Properties
   - name: Registry
-  - name: Alerts
-
-# ─────────────────────────── paths ────────────────────────────
+  - name: PASS
 paths:
-  /agents/register:
+  /agents:
     post:
       tags: [Agents]
       summary: 공인중개사 회원가입
@@ -33,19 +29,21 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [email, password, idImage]
+              required: [email, password, brokerNo, idImage]
               properties:
                 email:    { type: string, format: email }
                 password: { type: string, format: password }
+                brokerNo: { type: string }
+                name:     { type: string }
+                phoneNum: { type: string }
                 idImage:  { type: string, format: binary }
       responses:
         '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Agent' } } } }
         '409': { $ref: '#/components/responses/Conflict' }
-
   /agents/login:
     post:
       tags: [Agents]
-      summary: 로그인
+      summary: 공인중개사 로그인
       operationId: loginAgent
       requestBody:
         required: true
@@ -61,6 +59,16 @@ paths:
                 type: object
                 properties:
                   token: { type: string }
+  /agents/{id}/approve:
+    patch:
+      tags: [Agents]
+      summary: 회원 승인 (관리자)
+      operationId: approveAgent
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/Agent' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /contracts:
     post:
@@ -74,23 +82,82 @@ paths:
             schema: { $ref: '#/components/schemas/ContractDraft' }
       responses:
         '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
-
+  /contracts/verify:
+    post:
+      tags: [Contracts]
+      summary: 계약 전자서명 토큰 검증
+      operationId: verifyContractToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, description: 이메일로 전송된 서명 토큰 }
+      responses:
+        '200': { description: Verified, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /contracts/sign:
+    get:
+      tags: [Contracts]
+      summary: 서명 페이지 HTML 반환 (임시)
+      operationId: getSignPage
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: HTML page, content: { text/html: { schema: { type: string } } } }
+  /contracts/{id}:
+    get:
+      tags: [Contracts]
+      summary: 계약 상세 조회
+      operationId: getContract
+      parameters:
+        - $ref: '#/components/parameters/ContractId'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
   /contracts/{id}/pdf:
     post:
       tags: [Contracts]
-      summary: 계약서 PDF 생성 + (로컬/S3) 업로드
+      summary: 계약서 PDF 생성 + 업로드
       operationId: generateContractPdf
       parameters:
         - $ref: '#/components/parameters/ContractId'
       responses:
         '200':
-          description: PDF 업로드 결과
+          description: PDF key/hash
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  key: { type: string, description: S3 (or local) 키 }
+                  pdf:  { type: string }
+                  hash: { type: string }
+  /contracts/{id}/invite:
+    patch:
+      tags: [Contracts]
+      summary: 참가자 초대
+      operationId: inviteParticipant
+      parameters:
+        - $ref: '#/components/parameters/ContractId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role:  { type: string, enum: [tenant, landlord] }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /properties:
     get:
@@ -99,16 +166,15 @@ paths:
       operationId: listProperties
       responses:
         '200':
-          description: 배열 반환
+          description: Property 배열
           content:
             application/json:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Property' }
-
     post:
       tags: [Properties]
-      summary: 매물 구독 (등기 모니터링 시작)
+      summary: 매물 구독(모니터링 시작)
       operationId: subscribeProperty
       requestBody:
         required: true
@@ -119,52 +185,62 @@ paths:
         '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Property' } } } }
         '409': { $ref: '#/components/responses/Conflict' }
 
-  /registry/{propId}/snapshots:
+  /registry/{propId}:
     get:
       tags: [Registry]
-      summary: 매물 스냅샷 히스토리
-      operationId: listSnapshots
+      summary: 매물 최신 스냅샷
+      operationId: getLatestSnapshot
+      parameters:
+        - $ref: '#/components/parameters/PropertyId'
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Snapshot' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /registry/{propId}/events:
+    get:
+      tags: [Registry]
+      summary: 변동 이력 조회
+      operationId: listRegistryEvents
       parameters:
         - $ref: '#/components/parameters/PropertyId'
       responses:
         '200':
-          description: 모든 스냅샷
+          description: RegistryEvent 배열
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Snapshot' }
-
+                items: { $ref: '#/components/schemas/RegistryEvent' }
   /registry/{propId}/refresh:
     post:
       tags: [Registry]
-      summary: 스냅샷 강제 갱신(등기부 API 호출)  — 관리자용
+      summary: 스냅샷 강제 갱신 (등기부 API 호출)
       operationId: refreshRegistry
       parameters:
         - $ref: '#/components/parameters/PropertyId'
       responses:
-        '202': { description: Enqueued }
+        '202': { description: accepted }
 
-  /alerts:
-    get:
-      tags: [Alerts]
-      summary: 미발송 Alert 목록
-      operationId: listAlerts
-      parameters:
-        - in: query
-          name: sent
-          schema: { type: boolean }
-          description: true → 발송 완료만 / false → 미발송만 / 생략 → 전체
+  /pass/mock-verify:
+    post:
+      tags: [PASS]
+      summary: PASS 본인확인 Mock
+      operationId: passMockVerify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contractId, participantId]
+              properties:
+                contractId:    { type: string }
+                participantId: { type: string }
+                phoneNum:      { type: string }
+                name:          { type: string }
       responses:
-        '200':
-          description: Alert 배열
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/Alert' }
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Contract' } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
 
-# ─────────────────────── components ───────────────────────────
 components:
   securitySchemes:
     bearerAuth:
@@ -173,6 +249,11 @@ components:
       bearerFormat: JWT
 
   parameters:
+    AgentId:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
     PropertyId:
       in: path
       name: propId
@@ -189,11 +270,19 @@ components:
       description: 리소스 중복
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
 
   schemas:
-    # ── Auth ────────────────────────────────
     Credential:
       type: object
       required: [email, password]
@@ -207,17 +296,86 @@ components:
       properties:
         message: { type: string }
 
-    # ── Property & Registry ─────────────────
+    Agent:
+      type: object
+      required: [_id, email, brokerNo, approved]
+      properties:
+        _id:      { type: string }
+        name:     { type: string }
+        phoneNum: { type: string }
+        email:    { type: string, format: email }
+        brokerNo: { type: string }
+        idImage:  { type: string }
+        approved: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Participant:
+      type: object
+      required: [_id, email, role]
+      properties:
+        _id:       { type: string }
+        email:     { type: string, format: email }
+        name:      { type: string }
+        phoneNum:  { type: string }
+        role:      { type: string, enum: [tenant, landlord] }
+        verified:  { type: boolean }
+        ci:        { type: string }
+        signedAt:  { type: string, format: date-time, nullable: true }
+        tokenUsed: { type: boolean }
+
+    ContractDraft:
+      type: object
+      required: [property, finance, period, participants]
+      properties:
+        property: { type: string }
+        finance:
+          type: object
+          required: [deposit, payment, perMonth]
+          properties:
+            deposit:  { type: integer }
+            payment:  { type: integer }
+            perMonth: { type: boolean }
+        period:
+          type: object
+          required: [start, end]
+          properties:
+            start: { type: string, format: date }
+            end:   { type: string, format: date }
+        participants:
+          type: array
+          items: { $ref: '#/components/schemas/Participant' }
+
+    Contract:
+      type: object                     # <= FIXED
+      allOf:
+        - $ref: '#/components/schemas/ContractDraft'
+        - type: object
+          required: [_id, state]
+          properties:
+            _id:      { type: string }
+            agent:    { type: string }
+            state:    { type: string, enum: [draft, pending, signed, cancelled] }
+            pdfPath:  { type: string, nullable: true }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+
     PropertySubscribe:
       type: object
-      required: [addressBasic, uniqueNo, subsEmail]
+      required: [buildingName, addressBasic, uniqueNo, space, landlord, subsEmail]
       properties:
-        addressBasic:  { type: string }
+        buildingName: { type: string }
+        addressBasic: { type: string }
         addressDetail: { type: string }
-        uniqueNo:      { type: string, example: '101234567890' }
-        subsEmail:     { type: array, items: { type: string, format: email } }
+        space:        { type: integer }
+        uniqueNo:     { type: string }
+        landlord:     { type: string }
+        landlordName: { type: string }
+        subsEmail:    { type: array, items: { type: string, format: email } }
+        subsPhone:    { type: array, items: { type: string } }
 
     Property:
+      type: object                     # <= FIXED
       allOf:
         - $ref: '#/components/schemas/PropertySubscribe'
         - type: object
@@ -227,6 +385,8 @@ components:
             snapshots:
               type: array
               items: { $ref: '#/components/schemas/Snapshot' }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
 
     Snapshot:
       type: object
@@ -235,49 +395,14 @@ components:
         fetchedAt: { type: string, format: date-time }
         hash:      { type: string }
         parsed:    { type: object }
+        rawXml:    { type: string }
 
-    # ── Alert ───────────────────────────────
-    Alert:
+    RegistryEvent:
       type: object
-      required: [_id, type, message, createdAt, sent]
+      required: [_id, type, detectedAt]
       properties:
         _id:       { type: string }
-        property:  { $ref: '#/components/schemas/Property' }
-        type:
-          type: string
-          enum: [OWNER_CHANGE, LIEN_ADDED, LIEN_REMOVED, LIEN_AMOUNT_CHANGE, AUCTION_REGISTERED, UNKNOWN]
-        message:   { type: string }
+        property:  { type: string }
+        type:      { type: string }
         diff:      { type: object }
-        sent:      { type: boolean }
-        createdAt: { type: string, format: date-time }
-
-    # ── Agent ───────────────────────────────
-    Agent:
-      type: object
-      required: [_id, email, status]
-      properties:
-        _id:    { type: string }
-        email:  { type: string, format: email }
-        status:
-          type: string
-          enum: [PENDING, APPROVED]
-
-    # ── Contract ────────────────────────────
-    ContractDraft:
-      type: object
-      required: [tenantName, landlordName, monthlyRent]
-      properties:
-        tenantName:   { type: string }
-        landlordName: { type: string }
-        monthlyRent:  { type: integer, format: int32 }
-
-    Contract:
-      allOf:
-        - $ref: '#/components/schemas/ContractDraft'
-        - type: object
-          required: [_id, status]
-          properties:
-            _id:    { type: string }
-            status:
-              type: string
-              enum: [DRAFT, SIGNING, COMPLETE]
+        detectedAt: { type: string, format: date-time }
