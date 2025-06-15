@@ -2,6 +2,8 @@ import { Schema, model, Document } from 'mongoose';
 
 export interface AgentDoc extends Document {
   name: string;
+  address: string;
+  compName: string;
   phoneNum: string;
   email: string;
   pwHash: string;
@@ -12,7 +14,10 @@ export interface AgentDoc extends Document {
 
 const agentSchema = new Schema<AgentDoc>(
   {
+
     name:       { type: String, required: true },
+    address:    { type: String, required: true },
+    compName:   { type: String, required: true },
     phoneNum:   { type: String, required: true, unique: true },
     email:      { type: String, required: true, unique: true },
     pwHash:     { type: String, required: true },

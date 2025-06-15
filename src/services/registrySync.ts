@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import {sha256} from '../utils/crypt';
+import {getsha256HashStr} from '../utils/crypt';
 import deepDiff, { Diff } from 'deep-diff';
 
 import { Property, PropertyDoc } from '../models/property.model';
@@ -91,7 +91,7 @@ async function processProperty(prop: PropertyDoc): Promise<void> {
     const lhs = 'lhs' in d ? (d as any).lhs : undefined;
     const rhs = 'rhs' in d ? (d as any).rhs : undefined;
 
-    const diffHash = sha256(
+    const diffHash = getsha256HashStr(
       `${prop.uniqueNo}|${type}|${pathStr}|${JSON.stringify(lhs)}|${JSON.stringify(rhs)}`
     );
 

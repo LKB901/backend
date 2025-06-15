@@ -2,7 +2,7 @@
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import {sha256} from './crypt';
+import {getsha256HashStr} from './crypt';
 
 import { normalize } from './registryNormalize';
 import { RegistryResult } from './registryApi';
@@ -24,12 +24,12 @@ export async function fetchRegistryStub(uniqueNo: string): Promise<RegistryResul
     jsonPath = path.join(dir, `${cursor[uniqueNo]}.json`);
     const data = await fs.readFile(jsonPath, 'utf8');
     const parsed = normalize(JSON.parse(data));
-    return { rawXml: `<xml>${data}</xml>`, parsed, hash: sha256(data), noChange: true };
+    return { rawXml: `<xml>${data}</xml>`, parsed, hash: getsha256HashStr(data), noChange: true };
   }
 
   const data   = await fs.readFile(jsonPath, 'utf8');
   const parsed = normalize(JSON.parse(data));
-  const hash   = sha256(data);
+  const hash   = getsha256HashStr(data);
 
   console.log('[STUB] return', { uniqueNo, jsonPath });
   return { rawXml: `<xml>${data}</xml>`, parsed, hash };

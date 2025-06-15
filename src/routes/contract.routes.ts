@@ -61,7 +61,7 @@ router.patch('/:id/invite', authGuard, async (req: AuthReq, res: Response): Prom
       phoneNum: '',
       verified: false,
       tokenUsed: false,
-      ci: '',
+      ciHash: '',
       signedAt: null,            // 모델에서 nullable 로 정의
     });
   }
