@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { sendUnsentAlerts } from '../services/alertSender';
+import { sendUnsentAlerts } from '../utils/sendAlert';
 
 // ────────────────────────────────────────────────
 export function startAlertCron() {
