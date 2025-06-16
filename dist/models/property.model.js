@@ -9,18 +9,20 @@ const snapshotSchema = new mongoose_1.Schema({
     hash: String,
 }, { _id: false });
 const propertySchema = new mongoose_1.Schema({
-    /* 기본 정보 */
-    buildingName: { type: String, required: true },
     addressBasic: { type: String, required: true },
-    addressDetail: String,
+    rentDetailPart: String,
     space: { type: Number, required: true },
     uniqueNo: { type: String, index: true, required: true },
     /* 임대인 정보 */
-    landlord: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Landlord', required: true },
-    landlordName: String,
-    /* 알림 구독 정보 */
-    subsEmail: { type: [String], default: [] },
-    subsPhone: { type: [String], default: [] },
+    landlord: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TheParties', required: true },
+    building: {
+        structureAndPurpose: String,
+        space: Number
+    },
+    land: {
+        purpose: String,
+        space: Number
+    },
     /* 스냅샷 */
     snapshots: { type: [snapshotSchema], default: [] },
 }, { timestamps: true });

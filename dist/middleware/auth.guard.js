@@ -16,7 +16,7 @@ const authGuard = (req, res, next) => {
     try {
         // 2) 유효 토큰이면 agentId 주입
         const { sub } = jsonwebtoken_1.default.verify(hdr.slice(7), process.env.JWT_SECRET);
-        req.agentId = sub;
+        req.agentId = sub._id;
         next();
     }
     catch {

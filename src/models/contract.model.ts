@@ -54,7 +54,7 @@ export interface ContractDoc extends Document {
     state: ContractDocState;
     afterSignedState?: AfterSignedContractState; // 서명 이후 계약에 대한 속성
     hasProblem?: boolean;
-
+    signedInfo?: signedInfo[];
     pdfBase64?: string;
 }
 
@@ -69,22 +69,11 @@ const contractSchema = new Schema<ContractDoc>(
     state:   { type: String, enum: ['draft', 'signed', 'cancelled'], default: 'draft' },
     pdfBase64: { type: String, default:null },          // 초안 단계에서는 비어 있을 수 있음
 
-
-
     afterSignedState: {type: String, enum:
             ['disputed','Unilateral_terminated','Mutual_terminated'
             , 'expired','onGoing']},
 
     hasProblem: {type:Boolean, default:false},
-    finance: {
-      deposit : { type: Number, required: true },
-      payment : { type: Number, required: true },
-      perMonth: { type: Boolean, required: true },
-    },
-    period: {
-      start: { type: Date, required: true },
-      end:   { type: Date, required: true },
-    },
     signedInfo: [signedInfoSchema],
   },
   { timestamps: true },

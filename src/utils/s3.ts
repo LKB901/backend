@@ -20,13 +20,13 @@ if (LOCAL) {
   /* 로컬 파일 시스템 저장 ------------------- */
   uploadForm = multer({
     storage: multer.diskStorage({
-      destination: (_req, file, cb) => {
+      destination: (_req: any, file: { fieldname: string; }, cb: (arg0: null, arg1: string) => void) => {
         const dir =
           file.fieldname === 'idImage' ? 'uploads/ids' : 'uploads/contracts';
         if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
         cb(null, dir);
       },
-      filename: (_req, file, cb) => {
+      filename: (_req: any, file: { originalname: any; }, cb: (arg0: null, arg1: string) => void) => {
         cb(null, `${Date.now()}-${file.originalname}`);
       }
     })

@@ -91,7 +91,7 @@ async function processProperty(prop) {
         if (await alert_model_1.Alert.exists({ diffHash }))
             continue;
         /* 📄 PDF 자동 생성 */
-        const addr = `${prop.addressBasic}${prop.addressDetail ? ` ${prop.addressDetail}` : ''}`;
+        const addr = `${prop.addressBasic}${prop.rentDetailPart ? ` ${prop.rentDetailPart}` : ''}`;
         const pdf = await (0, pdf_1.generatePdf)(type.toLowerCase(), {
             address: addr,
             uniqueNo: prop.uniqueNo,

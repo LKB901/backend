@@ -9,6 +9,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const models_1 = require("../models");
 const s3_1 = require("../utils/s3");
+const auth_guard_1 = require("../middleware/auth.guard");
 const LOCAL = process.env.LOCAL_STORAGE === "true";
 const SECRET = process.env.JWT_SECRET; // 환경변수 검증은 별도에서!
 const router = (0, express_1.Router)();
@@ -37,7 +38,7 @@ router.patch("/:id/approve", async (req, res) => {
 /* ───────── 로그인 ───────── */
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
-    const agent = await models_1.Agent.findOne({ email, approved: true });
+    const agent = await models_1.Agent.findOne({ email, approved: true }).select('_id pwHash');
     if (!agent) {
         res.status(401).json({ msg: "no account or not approved" });
         return;
@@ -47,7 +48,20 @@ router.post("/login", async (req, res) => {
         res.status(401).json({ msg: "bad pw" });
         return;
     }
-    const token = jsonwebtoken_1.default.sign({ sub: agent._id }, SECRET, { expiresIn: "8h" });
-    res.json({ token });
+    const token = jsonwebtoken_1.default.sign({ sub: agent }, SECRET, { expiresIn: "8h" });
+    console.log(agent);
+    res.json({ token: token, id: agent._id });
+});
+router.get('/agentInfo/:id', auth_guard_1.authGuard, async (req, res) => {
+    const id = req.agentId;
+    console.log(id);
+    // console.log(req.params.id);
+    if (req.params.id != id) {
+        res.status(401).json({ msg: 'other agent' });
+        return;
+    }
+    const agentInfo = await models_1.Agent.findById(id).select('name manageProperties');
+    console.log(agentInfo);
+    res.json(agentInfo);
 });
 exports.default = router;

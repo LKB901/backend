@@ -28,12 +28,12 @@ router.get('/auditLog/:id', auth_guard_1.authGuard, async (req, res) => {
     }
     // 2. participantId → name, role 매핑용 Map 생성
     const participantsMap = new Map();
-    for (const participant of contract.participants) {
-        participantsMap.set(participant._id.toString(), {
-            name: participant.name,
-            role: participant.role
-        });
-    }
+    // for (const participant of contract.participants) {
+    //     participantsMap.set(participant._id.toString(), {
+    //         name: participant.name,
+    //         role: participant.role
+    //     });
+    // }
     // 3. AuditLog에서 해당 contract의 로그 조회
     const logs = await models_1.AuditLog.find({ contract: contractId })
         .select('action timestamp participant')

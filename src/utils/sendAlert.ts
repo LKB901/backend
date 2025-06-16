@@ -92,7 +92,7 @@ async function broadcastLandlordRisk(
 /* ── 메인 함수 ─────────────────────────────────── */
 export async function sendUnsentAlerts(): Promise<void> {
   const unsent = await Alert.find({ sent: false })
-    .populate<{ property: PropertyDoc }>('property')
+    .populate<{ property: PropertyDoc}>('property')
     .exec();
   console.log('[ALERT] unsent.length =', unsent.length);
 
@@ -154,7 +154,7 @@ export async function sendUnsentAlerts(): Promise<void> {
 
     /* ─────────────── 임대인 리스크 경고 ─────────────── */
     if (RISKY_TYPES.test(a.type) && a.property.landlord) {
-      const landlordName = a.property.landlordName ?? '';
+      const landlordName = a.property.landlord ?? ''; // 고치기
       const warningSms = [
         '⚠️ 전세사기 위험 알림',
         landlordName ? `임대인 ${landlordName}의` : '해당 임대인의',

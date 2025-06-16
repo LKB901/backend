@@ -22,3 +22,4 @@ __exportStar(require("./auditLog.model"), exports);
 __exportStar(require("./ledgerTx.model"), exports);
 __exportStar(require("./registryEvent.model"), exports);
 __exportStar(require("./registry.model"), exports);
+__exportStar(require("./theParties.model"), exports);

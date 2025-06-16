@@ -89,7 +89,7 @@ async function sendUnsentAlerts() {
             continue;
         /* 0. 공통 데이터 */
         const addr = a.property.addressBasic +
-            (a.property.addressDetail ? ` ${a.property.addressDetail}` : '');
+            (a.property.rentDetailPart ? ` ${a.property.rentDetailPart}` : '');
         /* ─────────────── SMS (개별 건물 알림) ─────────────── */
         const smsBody = [
             `[등기변동] ${addr}`,
@@ -137,7 +137,7 @@ async function sendUnsentAlerts() {
         }
         /* ─────────────── 임대인 리스크 경고 ─────────────── */
         if (RISKY_TYPES.test(a.type) && a.property.landlord) {
-            const landlordName = a.property.landlordName ?? '';
+            const landlordName = a.property.landlord ?? ''; // 고치기
             const warningSms = [
                 '⚠️ 전세사기 위험 알림',
                 landlordName ? `임대인 ${landlordName}의` : '해당 임대인의',
