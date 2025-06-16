@@ -9,7 +9,7 @@ const web3_1 = __importDefault(require("web3"));
 const fs_1 = __importDefault(require("fs"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: "../../env" });
-const contractJsonPath = "../../capstone/backend/blockchain/ignition/deployments/chain-11155111/artifacts/HashStorageModule#HashStorage.json";
+const contractJsonPath = "../backend/blockchain/ignition/deployments/chain-11155111/artifacts/HashStorageModule#HashStorage.json";
 const contractJsonRaw = fs_1.default.readFileSync(contractJsonPath, 'utf8');
 const contractAbi = JSON.parse(contractJsonRaw).abi;
 const web3 = new web3_1.default(new web3_1.default.providers.HttpProvider(process.env.SEPOLIA_RPC_URL));
