@@ -33,10 +33,25 @@ export function formatAlert(type: AlertType, diff: any): string {
     case 'AUCTION_END':
       return '경매 절차 종료(말소)';
 
+    case 'LEASE_ADD':
+      return `새 임차권 설정: 세입자 ${diff.item.rhs.tenant} / 보증금 ${formatMoney(diff.item.rhs.deposit)}`;
+    case 'LEASE_EDIT': {
+            const field = diff.path.at(-1);
+            if (field === 'deposit')
+            return `임차권 보증금 변경: ${formatMoney(diff.lhs)} → ${formatMoney(diff.rhs)}`;
+            if (field === 'term')
+            return `임차권 기간 변경: ${diff.lhs.from}~${diff.lhs.to} → ${diff.rhs.from}~${diff.rhs.to}`;
+            return '임차권 정보 수정';
+            }
+    case 'LEASE_REMOVE':
+            return `임차권 말소: ${diff.item.lhs.tenant} / ${formatMoney(diff.item.lhs.deposit)}`;  
+
     default:
       return '등기부 변동 감지 (상세 미분류)';
   }
 }
+
+//임차권 등기 만들어야함
 
 function formatMoney(n: string | number) {
   const num = typeof n === 'number' ? n : Number(String(n).replace(/[^0-9]/g, ''));

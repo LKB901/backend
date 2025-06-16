@@ -41,6 +41,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.804.0",
     "@pdf-lib/fontkit": "^1.1.1",
+    "@types/web3": "^1.0.20",
     "async-mutex": "^0.5.0",
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
@@ -61,6 +62,7 @@
     "serverless-http": "^3.2.0",
     "twilio": "^5.6.1",
     "uuid": "^11.1.0",
+    "web3": "^4.16.0",
     "xml2js": "^0.6.2",
     "yamljs": "^0.3.0"
   }

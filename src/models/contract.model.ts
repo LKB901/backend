@@ -1,5 +1,5 @@
 import { Schema, model, Types, Document } from 'mongoose';
-import {boolean} from "hardhat/internal/core/params/argumentTypes";
+
 
 /* ───────── 타입 정의 ───────── */
 export type ContractDocState =
@@ -83,7 +83,7 @@ const contractSchema = new Schema<ContractDoc>(
     afterSignedState: {type: String, enum:
             ['disputed','Unilateral terminated','Mutual terminated'
             , 'expired','onGoing']},
-    hasProblem: {type:boolean, default:false},
+    hasProblem: { type: Boolean, default: false },
     finance: {
       deposit : { type: Number, required: true },
       payment : { type: Number, required: true },
