@@ -31,11 +31,11 @@ const { abi, address: deployedAddress } = JSON.parse(
 /* ── 2. Web3 초기화 ────────────────────────────────────────── */
 const rpcUrl  = process.env.SEPOLIA_RPC_URL;
 const privKey = process.env.PRIVATE_KEY;
-const ctrAddr = process.env.CONTRACT_ADDR ?? deployedAddress;
+const ctrAddr = process.env.ETH_ACCOUNT_ADDR ?? deployedAddress;
 
 if (!rpcUrl)  throw new Error('❌ SEPOLIA_RPC_URL env var not set');
 if (!privKey) throw new Error('❌ PRIVATE_KEY env var not set');
-if (!ctrAddr) throw new Error('❌ CONTRACT_ADDR env var not set');
+if (!ctrAddr) throw new Error('❌ ETH_ACCOUNT_ADDR env var not set');
 
 const web3     = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 const contract = new web3.eth.Contract(abi, ctrAddr);
