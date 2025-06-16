@@ -19,6 +19,9 @@ const contractSchema = new mongoose_1.Schema({
     agent: { type: mongoose_1.Schema.Types.ObjectId, ref: 'agents', required: true },
     state: { type: String, enum: ['draft', 'pending', 'signed', 'cancelled'], default: 'draft' },
     pdfPath: { type: String }, // 초안 단계에서는 비어 있을 수 있음
+    afterSignedState: { type: String, enum: ['disputed', 'Unilateral terminated', 'Mutual terminated',
+            'expired', 'onGoing'] },
+    hasProblem: { type: Boolean, default: false },
     finance: {
         deposit: { type: Number, required: true },
         payment: { type: Number, required: true },

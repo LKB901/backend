@@ -10,6 +10,16 @@
         ]
       }
     ],
-    "resState": "경매개시결정"
+    "resLeaseholdsList": [
+      {
+        "resType": "임차권설정",
+        "resContentsList": [
+          { "resNo": 1, "resContents": "세입자 홍길동", "resEtc": "" },
+          { "resNo": 2, "resContents": "보증금 50,000,000", "resEtc": "" },
+          { "resNo": 3, "resContents": "기간 2025-03-01 ~ 2027-02-28", "resEtc": "" }
+        ]
+      }
+    ],
+    "resState": ""
   }
 }

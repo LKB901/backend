@@ -57,7 +57,7 @@ router.patch('/:id/invite', auth_guard_1.authGuard, async (req, res) => {
             phoneNum: '',
             verified: false,
             tokenUsed: false,
-            ci: '',
+            ciHash: '',
             signedAt: null, // 모델에서 nullable 로 정의
         });
     }

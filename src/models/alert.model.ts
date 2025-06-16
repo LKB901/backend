@@ -8,7 +8,10 @@ export type AlertType =
   | 'LIEN_EDIT'
   | 'LIEN_REMOVE'
   | 'AUCTION_START'
-  | 'AUCTION_END';
+  | 'AUCTION_END'
+  | 'LEASE_ADD'  
+  | 'LEASE_EDIT'  
+  | 'LEASE_REMOVE';
 
 /* ── 인터페이스 정의 ─────────────────────────────── */
 interface AlertAttrs {
@@ -43,6 +46,10 @@ const alertSchema = new Schema<AlertDoc>(
         'LIEN_REMOVE',
         'AUCTION_START',
         'AUCTION_END',
+        'LEASE_ADD',
+        'LEASE_EDIT',
+        'LEASE_REMOVE',
+        
       ],
     },
 

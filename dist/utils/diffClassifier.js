@@ -6,6 +6,12 @@ function classifyDiff(d) {
     const p = (d.path ?? []).join('.');
     if (p === 'owner' && d.kind === 'E')
         return 'OWNER_CHANGE';
+    if (p === 'leaseholds' && d.kind === 'A' && d.item?.kind === 'N')
+        return 'LEASE_ADD';
+    if (/^leaseholds\.\d+\./.test(p) && d.kind === 'E')
+        return 'LEASE_EDIT';
+    if (p === 'leaseholds' && d.kind === 'A' && d.item?.kind === 'D')
+        return 'LEASE_REMOVE';
     if (p === 'liens' && d.kind === 'A' && d.item?.kind === 'N')
         return 'LIEN_ADD';
     if (/^liens\.\d+\./.test(p) && d.kind === 'E')

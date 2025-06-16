@@ -8,7 +8,7 @@ exports.fetchRegistryStub = fetchRegistryStub;
 const promises_1 = __importDefault(require("fs/promises"));
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
-const crypto_1 = __importDefault(require("crypto"));
+const crypt_1 = require("./crypt");
 const registryNormalize_1 = require("./registryNormalize");
 const ROOT = path_1.default.resolve('__stubs__/registry');
 console.log('[STUB] registry root =', ROOT);
@@ -23,14 +23,11 @@ async function fetchRegistryStub(uniqueNo) {
         jsonPath = path_1.default.join(dir, `${cursor[uniqueNo]}.json`);
         const data = await promises_1.default.readFile(jsonPath, 'utf8');
         const parsed = (0, registryNormalize_1.normalize)(JSON.parse(data));
-        return { rawXml: `<xml>${data}</xml>`, parsed, hash: sha256(data), noChange: true };
+        return { rawXml: `<xml>${data}</xml>`, parsed, hash: (0, crypt_1.getsha256HashStr)(data), noChange: true };
     }
     const data = await promises_1.default.readFile(jsonPath, 'utf8');
     const parsed = (0, registryNormalize_1.normalize)(JSON.parse(data));
-    const hash = sha256(data);
+    const hash = (0, crypt_1.getsha256HashStr)(data);
     console.log('[STUB] return', { uniqueNo, jsonPath });
     return { rawXml: `<xml>${data}</xml>`, parsed, hash };
-}
-function sha256(t) {
-    return crypto_1.default.createHash('sha256').update(t).digest('hex');
 }

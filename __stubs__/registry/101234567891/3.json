@@ -1,7 +1,16 @@
 {
   "output": {
-    "resUserNm": "김부동",
-    "resRegisterEntriesList": [],
-    "resState": "정상"
+    "resUserNm": "이등기",
+    "resRegisterEntriesList": [
+      {
+        "resType": "근저당권설정",
+        "resContentsList": [
+          { "resNo": 1, "resContents": "국민은행", "resEtc": "" },
+          { "resNo": 2, "resContents": "100,000,000", "resEtc": "" }
+        ]
+      }
+    ],
+    "resLeaseholdsList": [],
+    "resState": ""
   }
 }

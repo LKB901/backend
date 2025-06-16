@@ -26,6 +26,6 @@ async function fetchRegistry(uniqueNo) {
     });
     const json = await (0, xml2js_1.parseStringPromise)(data, { explicitArray: false });
     const parsed = (0, registryNormalize_1.normalize)(json);
-    const hash = (0, crypt_1.sha256)(data);
+    const hash = (0, crypt_1.getsha256HashStr)(data);
     return { rawXml: data, parsed, hash };
 }

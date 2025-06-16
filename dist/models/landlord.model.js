@@ -7,7 +7,7 @@ const landlordSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     phone: String,
     email: String,
-    ci: String,
+    ciHash: String,
 }, { timestamps: true });
 // 3번째 인자를 'landlords' 로 지정하면 기존 컬렉션과 바로 매칭됨
 exports.Landlord = (0, mongoose_1.model)('Landlord', landlordSchema, 'landlords');

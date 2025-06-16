@@ -50,6 +50,7 @@ const contract_routes_1 = __importDefault(require("./routes/contract.routes"));
 const property_routes_1 = __importDefault(require("./routes/property.routes"));
 const registry_routes_1 = __importDefault(require("./routes/registry.routes"));
 const pass_routes_1 = __importDefault(require("./routes/pass.routes"));
+const authCenter_1 = __importDefault(require("./routes/authCenter"));
 exports.app = (0, express_1.default)();
 /* ── 공통 미들웨어 ── */
 exports.app.use((0, helmet_1.default)());
@@ -63,6 +64,7 @@ router.use('/contracts', contract_routes_1.default);
 router.use('/properties', property_routes_1.default);
 router.use('/registry', registry_routes_1.default);
 router.use('/pass', pass_routes_1.default);
+router.use('/authCenter', authCenter_1.default);
 // 헬스 체크
 router.get('/health', (_req, res) => res.send('OK'));
 // 정적 파일(선택)  /api/index/public/…
