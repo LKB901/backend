@@ -10,7 +10,7 @@ import { startAlertCron }    from './services/alertCron';
 
   const PORT = Number(process.env.PORT) || 3000;
   app.listen(PORT, () => console.log(`API up at :${PORT}`));
-
-  startRegistryCron();
-  startAlertCron();
+  //
+  // startRegistryCron();
+  // startAlertCron();
 })();

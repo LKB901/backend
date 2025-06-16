@@ -102,7 +102,7 @@ export async function sendUnsentAlerts(): Promise<void> {
     /* 0. 공통 데이터 */
     const addr =
       a.property.addressBasic +
-      (a.property.addressDetail ? ` ${a.property.addressDetail}` : '');
+      (a.property.rentDetailPart ? ` ${a.property.rentDetailPart}` : '');
 
     /* ─────────────── SMS (개별 건물 알림) ─────────────── */
     const smsBody = [

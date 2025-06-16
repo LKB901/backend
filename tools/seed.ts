@@ -1,7 +1,7 @@
 // tools/seed.ts
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { Landlord } from '../src/models/landlord.model';
+import { TheParties } from '../src/models/theParties.model';
 import { Property } from '../src/models/property.model';
 
 async function main() {
@@ -11,12 +11,12 @@ async function main() {
 
   /* 1. 기존 데이터 정리 --------------------------------------------- */
   await Promise.all([
-    Landlord.deleteMany({}),
+    TheParties.deleteMany({}),
     Property.deleteMany({}),
   ]);
 
   /* 2. 임대인(공통 식별자) 1건 생성 ---------------------------------- */
-  const landlord = await Landlord.create({
+  const landlord = await TheParties.create({
     name : '홍길동',
     ci   : 'CICICICI-TEST-001',
     phone: '01012345678',

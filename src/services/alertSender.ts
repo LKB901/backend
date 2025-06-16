@@ -29,7 +29,7 @@ export async function sendUnsentAlerts(): Promise<void> {
     /* 1️⃣ 주소 한 줄 */
     const fullAddr =
       a.property.addressBasic +
-      (a.property.addressDetail ? ` ${a.property.addressDetail}` : '');
+      (a.property.rentDetailPart ? ` ${a.property.rentDetailPart}` : '');
 
     /* 2️⃣ PDF 다운로드 URL (알림별) */
     const url = `${PUBLIC_ORIGIN}/${a.pdfPath}`;

@@ -6,3 +6,4 @@ export * from './auditLog.model';
 export * from './ledgerTx.model';
 export * from './registryEvent.model';
 export * from './registry.model';
+export * from './theParties.model';

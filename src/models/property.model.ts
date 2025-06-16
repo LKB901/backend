@@ -1,5 +1,5 @@
 import { Schema, model, Types, Document } from 'mongoose';
-import { LandlordDoc } from './landlord.model';
+import { ThePartiesDoc } from './theParties.model';
 
 /* ── 서브 도큐먼트: 등기 스냅샷 ───────────────────── */
 interface Snapshot {
@@ -19,41 +19,51 @@ const snapshotSchema = new Schema<Snapshot>(
   { _id: false }
 );
 
+
 /* ── 메인 스키마 ─────────────────────────────────── */
 interface PropertyAttrs {
-  buildingName: string;
-  addressBasic: string;
-  addressDetail?: string;
-  space: number;
-  uniqueNo: string;
-  landlord: Types.ObjectId | LandlordDoc;
-  landlordName?: string;
-  subsEmail: string[];
-  subsPhone: string[];
-  snapshots: Snapshot[];
+    addressBasic: string;
+    rentDetailPart: string; // 임차할 상세 부분
+    building:{
+        structureAndPurpose:string,
+        space: number
+    };
+    land: {
+        purpose: string,
+        space: number
+    };
+    space: number;
+    uniqueNo: string;
+    landlord: Types.ObjectId | ThePartiesDoc;
+    subsEmail: string[];
+    subsPhone: string[];
+    snapshots: Snapshot[];
 }
 
 export interface PropertyDoc extends Document, PropertyAttrs {
   _id: Types.ObjectId;        // ← _id 타입 명시
 }
 
+
 const propertySchema = new Schema<PropertyDoc>(
   {
-    /* 기본 정보 */
-    buildingName: { type: String, required: true },
     addressBasic: { type: String, required: true },
-    addressDetail: String,
+    rentDetailPart: String,
     space: { type: Number, required: true },
     uniqueNo: { type: String, index: true, required: true },
 
     /* 임대인 정보 */
-    landlord: { type: Schema.Types.ObjectId, ref: 'Landlord', required: true },
-    landlordName: String,
+    landlord: { type: Schema.Types.ObjectId, ref: 'TheParties', required: true },
 
-    /* 알림 구독 정보 */
-    subsEmail: { type: [String], default: [] },
-    subsPhone: { type: [String], default: [] },
+    building:    {
+        structureAndPurpose:String,
+        space: Number
+    },
 
+    land:{
+        purpose: String,
+        space: Number
+    },
     /* 스냅샷 */
     snapshots: { type: [snapshotSchema], default: [] },
   },

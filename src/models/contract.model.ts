@@ -3,87 +3,79 @@ import {boolean} from "hardhat/internal/core/params/argumentTypes";
 
 /* ───────── 타입 정의 ───────── */
 export type ContractDocState =
-  | 'draft'      // 초안만 작성
-  | 'pending'    // PDF 생성·참가자 초대 완료, 서명 대기
+  | 'draft'      // 계약 문서 생성 완료 서명 대기.
   | 'signed'     // 전원 서명 완료
   | 'cancelled'; // 임의 취소
 
 export type AfterSignedContractState=
   | 'disputed'
-  | 'Unilateral terminated'
-  | 'Mutual terminated'
+  | 'Unilateral_terminated'
+  | 'Mutual_terminated'
   | 'expired'
   | 'onGoing';
 
-export type ParticipantRole = 'tenant' | 'landlord';
+export type LeaseKind =
+    | 'lump_sum'
+    | 'per_month'
+    | 'per_month_with_depoist';
 
-export interface Participant {
-  _id: Types.ObjectId;        // mongoose 자동 생성
-  email: string;
-  name: string;
-  phoneNum: string;
-  role: ParticipantRole;
+export type ContractType =
+    | 'new'
+    | 'renewal'
+    | 're-sign'
+export type ParticipantRole = 'tenant' | 'landlord' |'agent';
 
-  /* PASS 본인확인 */
-  verified: boolean;
-  ciHash?: string;                // PASS CI (선택)
+export interface signedInfo{
+    role: ParticipantRole;
+    /* 전자서명 */
 
-  /* 전자서명 */
-  signedAt?: Date | null;     // 서명 시각
-  tokenUsed: boolean;         // 재사용 방지 토큰
-}
-
-export interface ContractDoc extends Document {
-  property : Types.ObjectId;
-  agent    : Types.ObjectId;
-
-  state    : ContractDocState;
-  afterSignedState? :  AfterSignedContractState; // 서명 이후 계약에 대한 속성
-  hasProblem? : boolean;
-  pdfPath? : string;          // 초안 단계에서는 아직 없음
-
-  finance  : {
-    deposit : number;
-    payment : number;
-    perMonth: boolean;
-  };
-  period   : {
-    start: Date;
-    end  : Date;
-  };
-  participants: Participant[];
+    signedAt?: Date | null;     // 서명 시각
+    tokenUsed: boolean;         // 재사용 방지 토큰
 }
 
 /* ───────── 서브 스키마 ───────── */
-const participantSchema = new Schema<Participant>(
-  {
-    email:     { type: String, required: true },
-    name:      { type: String, default: '' },
-    phoneNum:  { type: String, default: '' },
-    role:      { type: String, enum: ['tenant', 'landlord'], required: true },
-
-    verified:  { type: Boolean, default: false },
-    ciHash:    { type: String },
-
-    signedAt:  { type: Date, default: null },
-    tokenUsed: { type: Boolean, default: false },
-  },
-  { _id: true },
+const signedInfoSchema = new Schema<signedInfo>(
+    {
+        role:      { type: String, enum: ['tenant', 'landlord','agent'], required: true },
+        signedAt:  { type: Date, default: null},
+        tokenUsed: { type: Boolean, default: false},
+    },
+    { _id: true },
 );
+
+export interface ContractDoc extends Document {
+    property: Types.ObjectId;
+    agent: Types.ObjectId;
+    landLord: Types.ObjectId;
+    contractType: ContractType;
+    leaseKind: LeaseKind;
+
+    tenant: Types.ObjectId;
+    state: ContractDocState;
+    afterSignedState?: AfterSignedContractState; // 서명 이후 계약에 대한 속성
+    hasProblem?: boolean;
+
+    pdfBase64?: string;
+}
+
 
 /* ───────── 메인 스키마 ───────── */
 const contractSchema = new Schema<ContractDoc>(
   {
-    property: { type: Schema.Types.ObjectId, ref: 'properties', required: true },
+    property: { type: Schema.Types.ObjectId, ref: 'Property', required: true },
     agent:    { type: Schema.Types.ObjectId, ref: 'agents',     required: true },
+    landLord: { type: Schema.Types.ObjectId, ref:'TheParties', required: true},
+    tenant: { type: Schema.Types.ObjectId, ref: 'TheParties', required:true},
+    state:   { type: String, enum: ['draft', 'signed', 'cancelled'], default: 'draft' },
+    pdfBase64: { type: String, default:null },          // 초안 단계에서는 비어 있을 수 있음
 
-    state:   { type: String, enum: ['draft', 'pending', 'signed', 'cancelled'], default: 'draft' },
-    pdfPath: { type: String },          // 초안 단계에서는 비어 있을 수 있음
+
 
     afterSignedState: {type: String, enum:
-            ['disputed','Unilateral terminated','Mutual terminated'
+            ['disputed','Unilateral_terminated','Mutual_terminated'
             , 'expired','onGoing']},
-    hasProblem: {type:boolean, default:false},
+
+    hasProblem: {type:Boolean, default:false},
     finance: {
       deposit : { type: Number, required: true },
       payment : { type: Number, required: true },
@@ -93,8 +85,7 @@ const contractSchema = new Schema<ContractDoc>(
       start: { type: Date, required: true },
       end:   { type: Date, required: true },
     },
-
-    participants: [participantSchema],
+    signedInfo: [signedInfoSchema],
   },
   { timestamps: true },
 );

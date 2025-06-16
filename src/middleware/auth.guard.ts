@@ -20,7 +20,7 @@ export const authGuard: RequestHandler = (req, res, next) => {
   try {
     // 2) 유효 토큰이면 agentId 주입
     const { sub } = jwt.verify(hdr.slice(7), process.env.JWT_SECRET!) as any;
-    (req as unknown as AuthReq).agentId = sub;
+    (req as unknown as AuthReq).agentId = sub._id;
     next();
   } catch {
     // 3) 잘못된 토큰 → 401
