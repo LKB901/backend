@@ -49,12 +49,14 @@ export interface ContractDoc extends Document {
     landLord: Types.ObjectId;
     contractType: ContractType;
     leaseKind: LeaseKind;
-
+    period:{
+        start: Date;
+        end: Date;
+    }
     tenant: Types.ObjectId;
     state: ContractDocState;
     afterSignedState?: AfterSignedContractState; // 서명 이후 계약에 대한 속성
-    hasProblem?: boolean;
-    signedInfo?: signedInfo[];
+    signedInfo?: signedInfo;
     pdfBase64?: string;
 }
 
@@ -68,12 +70,13 @@ const contractSchema = new Schema<ContractDoc>(
     tenant: { type: Schema.Types.ObjectId, ref: 'TheParties', required:true},
     state:   { type: String, enum: ['draft', 'signed', 'cancelled'], default: 'draft' },
     pdfBase64: { type: String, default:null },          // 초안 단계에서는 비어 있을 수 있음
-
+    period:{
+          start: Date,
+          end: Date
+    },
     afterSignedState: {type: String, enum:
             ['disputed','Unilateral_terminated','Mutual_terminated'
             , 'expired','onGoing']},
-
-    hasProblem: {type:Boolean, default:false},
     signedInfo: [signedInfoSchema],
   },
   { timestamps: true },
