@@ -44,10 +44,12 @@ function toDomestic(num) {
 function getAdvicePdfFilename(alertType) {
     if (/auction/i.test(alertType))
         return 'auction-advice.pdf';
-    if (/mortgage/i.test(alertType))
+    if (/mortgage|lien/i.test(alertType))
         return 'mortgage-advice.pdf';
     if (/owner/i.test(alertType))
         return 'owner-advice.pdf';
+    if (/lease/i.test(alertType))
+        return 'lease-advice.pdf';
     return null;
 }
 /*  “전세사기 위험” 으로 간주할 alert.type  */

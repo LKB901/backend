@@ -87,7 +87,7 @@ async function processProperty(prop) {
         // deep-diff의 union 타입 안전 처리
         const lhs = 'lhs' in d ? d.lhs : undefined;
         const rhs = 'rhs' in d ? d.rhs : undefined;
-        const diffHash = (0, crypt_1.sha256)(`${prop.uniqueNo}|${type}|${pathStr}|${JSON.stringify(lhs)}|${JSON.stringify(rhs)}`);
+        const diffHash = (0, crypt_1.getsha256HashStr)(`${prop.uniqueNo}|${type}|${pathStr}|${JSON.stringify(lhs)}|${JSON.stringify(rhs)}`);
         if (await alert_model_1.Alert.exists({ diffHash }))
             continue;
         /* 📄 PDF 자동 생성 */
