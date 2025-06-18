@@ -16,9 +16,12 @@ const contractSchema = new mongoose_1.Schema({
     tenant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TheParties', required: true },
     state: { type: String, enum: ['draft', 'signed', 'cancelled'], default: 'draft' },
     pdfBase64: { type: String, default: null }, // 초안 단계에서는 비어 있을 수 있음
+    period: {
+        start: Date,
+        end: Date
+    },
     afterSignedState: { type: String, enum: ['disputed', 'Unilateral_terminated', 'Mutual_terminated',
             'expired', 'onGoing'] },
-    hasProblem: { type: Boolean, default: false },
     signedInfo: [signedInfoSchema],
 }, { timestamps: true });
 exports.Contract = (0, mongoose_1.model)('contracts', contractSchema);

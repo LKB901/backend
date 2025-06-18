@@ -11,7 +11,7 @@ const artifactPath =
   process.env.CONTRACT_ARTIFACT ??
   path.resolve(
     __dirname,
-    __dirname.includes(path.sep + 'dist' + path.sep) ? '../../' : '../',
+    __dirname.includes(path.sep + 'dist' + path.sep) ? '../../../' : '../../',
     'blockchain',
     'ignition',
     'deployments',

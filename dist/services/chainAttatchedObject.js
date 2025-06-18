@@ -13,7 +13,7 @@ const web3_1 = __importDefault(require("web3"));
 /*  • dist/services → ../../blockchain/...  (빌드)
     • src/services  → ../blockchain/...     (개발, ts-node-dev) */
 const artifactPath = process.env.CONTRACT_ARTIFACT ??
-    path_1.default.resolve(__dirname, __dirname.includes(path_1.default.sep + 'dist' + path_1.default.sep) ? '../../' : '../', 'blockchain', 'ignition', 'deployments', 'chain-11155111', 'artifacts', 'HashStorageModule#HashStorage.json');
+    path_1.default.resolve(__dirname, __dirname.includes(path_1.default.sep + 'dist' + path_1.default.sep) ? '../../../' : '../../', 'blockchain', 'ignition', 'deployments', 'chain-11155111', 'artifacts', 'HashStorageModule#HashStorage.json');
 if (!fs_1.default.existsSync(artifactPath)) {
     throw new Error(`❌ Contract artifact not found at: ${artifactPath}`);
 }

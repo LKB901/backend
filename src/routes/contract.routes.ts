@@ -18,12 +18,26 @@ import { sendToLedger } from '../utils/ledger';
 const router = Router();
 
 /* ---------- 1. 초안(DRAFT) 생성 ---------- */
-router.post('/', authGuard, async (req: AuthReq, res: Response): Promise<void> => {
-  const contract = await Contract.create({
-    agent: req.agentId,
-    ...req.body,
+router.post('/', async (req, res): Promise<void> => {
+    const tenant = await TheParties.findOne(req.body.tenant).select('_id').exec();
+    let tenantID;
+    if(tenant){
+        tenantID = tenant._id;
+    }else{
+        tenantID = await TheParties.create(req.body.tenant);
+    }
+    delete req.body.tenant;
+    console.log(req.body);
+    const ContractInfo = {
+        ...req.body,
+        tenant: tenantID
+    }
+
+    const contract = await Contract.create({
+    ...ContractInfo
   });
-  res.status(201).json({ id: contract._id });
+    console.log(contract);
+  res.json({ id: contract._id });
 });
 
 /* ---------- 2. 계약서 PDF 생성 ---------- */

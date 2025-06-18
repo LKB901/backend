@@ -23,6 +23,7 @@ export type ContractType =
     | 'new'
     | 'renewal'
     | 're-sign'
+
 export type ParticipantRole = 'tenant' | 'landlord' |'agent';
 
 export interface signedInfo{
